@@ -3,8 +3,7 @@ import { ChatGroq } from "@langchain/groq";
 import { AIMessage, HumanMessage, SystemMessage, type BaseMessage } from "@langchain/core/messages";
 import { z } from "zod";
 import { getDb } from "./db";
-import { getFaq, searchFaqs, type FaqHit } from "./search";
-import { classify, intentThreshold, useHfIntent } from "./intent";
+import { searchFaqs, type FaqHit } from "./search";
 
 /* ───────────── Model ───────────── */
 
@@ -27,7 +26,11 @@ const main = () =>
 // JSON schema ketat (didukung gpt-oss di Groq) lebih stabil daripada tool calling.
 const structured = <T extends z.ZodType>(schema: T, name: string) =>
   // gpt-oss kadang mengeluarkan teks "berpikir" alih-alih JSON → ulangi sekali.
-  fast().withStructuredOutput(schema, { name, method: "jsonSchema" }).withRetry({ stopAfterAttempt: 2 });
+  fast()
+    .withStructuredOutput(schema, { name, method: "jsonSchema" })
+    .withRetry({ stopAfterAttempt: 2 })
+    // Masih gagal → pakai model besar (lebih patuh format JSON).
+    .withFallbacks([main().withStructuredOutput(schema, { name, method: "jsonSchema" })]);
 
 /** Kuota habis jangan disamarkan jadi "oper ke CS" — biar route membalas "server sibuk". */
 const rethrowRateLimit = (e: unknown) => {
@@ -41,8 +44,6 @@ export const TEXT = {
     "Pertanyaanmu sudah kami teruskan ke **tim CS Cliploo**. Mohon tunggu sebentar ya, kamu akan segera disambungkan dengan CS. 🙏",
   sensitive:
     "Ini perlu ditangani langsung oleh **tim CS Cliploo**, jadi pertanyaanmu sudah kami teruskan. Mohon tunggu sebentar, kamu akan segera disambungkan.\n\n🔒 Sambil menunggu: Cliploo **tidak pernah** meminta kode OTP, password, PIN, atau data kartu. Jangan berikan kepada siapa pun, termasuk yang mengaku dari Cliploo.",
-  smalltalk:
-    "Hai! 👋 Aku asisten bantuan Cliploo. Ada yang bisa kubantu soal pesanan, pembayaran, pengiriman, pengembalian, voucher, atau jualan di Cliploo?",
   offtopic:
     "Maaf, aku hanya bisa membantu pertanyaan seputar **belanja dan jualan di Cliploo** — misalnya pembayaran, pengiriman, pengembalian, voucher, atau buka toko. Ada yang bisa kubantu soal itu? 😊",
 };
@@ -266,61 +267,7 @@ const afterGrade = (s: S) => {
   return "handoff";
 };
 
-/* ───────────── Mode model sendiri (INTENT_PROVIDER=hf) ───────────── */
-
-// Classifier hasil training (training/train_intent.py) menggantikan analyze+retrieve+grade.
-async function classifyNode(s: S): Promise<Partial<S>> {
-  const sensitive = SENSITIVE.test(s.question);
-  if (sensitive) return { intent: "sensitive", sensitive };
-  if (WANTS_CS.test(s.question)) return { intent: "cs", sensitive };
-  const { label, score } = await classify(s.question);
-  // Ragu → oper ke CS daripada menjawab salah.
-  const intent = score < intentThreshold() ? "handoff" : label;
-  console.log(`[intent] ${label} ${score.toFixed(2)} → ${intent}`);
-  return { intent, sensitive, standalone: s.question };
-}
-
-async function faqAnswer(s: S): Promise<Partial<S>> {
-  const faq = await getFaq(Number(s.intent.slice(4)));
-  if (!faq) return { relevant: [] };
-  return { outcome: "answer", answer: faq.answer, relevant: [faq] };
-}
-
-async function smalltalkFixed(): Promise<Partial<S>> {
-  return { outcome: "smalltalk", answer: TEXT.smalltalk };
-}
-
-// Opsional: jawaban FAQ dirangkai ulang oleh Groq (HF_POLISH=1 + GROQ_API_KEY).
-const polish = () => process.env.HF_POLISH === "1" && !!process.env.GROQ_API_KEY;
-
-const hfGraph = new StateGraph(State)
-  .addNode("classify", classifyNode)
-  .addNode("faq", faqAnswer)
-  .addNode("generate", generate)
-  .addNode("smalltalk", smalltalkFixed)
-  .addNode("offtopic", offtopic)
-  .addNode("handoff", handoff)
-  .addEdge(START, "classify")
-  .addConditionalEdges(
-    "classify",
-    (s: S) =>
-      s.intent.startsWith("faq:") ? "faq" : s.intent === "smalltalk" ? "smalltalk" : s.intent === "offtopic" ? "offtopic" : "handoff",
-    ["faq", "smalltalk", "offtopic", "handoff"],
-  )
-  .addConditionalEdges("faq", (s: S) => (s.relevant.length === 0 ? "handoff" : polish() ? "generate" : END), [
-    "handoff",
-    "generate",
-    END,
-  ])
-  .addEdge("generate", END)
-  .addEdge("smalltalk", END)
-  .addEdge("offtopic", END)
-  .addEdge("handoff", END)
-  .compile();
-
-/* ───────────── Mode Groq (default) ───────────── */
-
-const groqGraph = new StateGraph(State)
+export const graph = new StateGraph(State)
   .addNode("analyze", analyze)
   .addNode("retrieve", retrieve)
   .addNode("grade", grade)
@@ -341,9 +288,6 @@ const groqGraph = new StateGraph(State)
   .addEdge("offtopic", END)
   .addEdge("handoff", END)
   .compile();
-
-export const graphs = { groq: groqGraph, hf: hfGraph };
-export const getGraph = () => (useHfIntent() ? hfGraph : groqGraph);
 
 /** Node yang token-nya di-stream ke browser. */
 export const STREAMED_NODES = new Set(["generate", "smalltalk"]);

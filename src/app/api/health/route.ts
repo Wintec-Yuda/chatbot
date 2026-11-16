@@ -1,16 +1,17 @@
-import { classify, useHfIntent } from "@/lib/intent";
 import { getDb } from "@/lib/db";
 
-export const maxDuration = 60;
-
 /**
- * GET /api/health — cek koneksi DB dan (mode hf) pemuatan model.
- * Hanya menampilkan pesan error, tanpa nilai env/token.
+ * GET /api/health — cek koneksi DB dan apakah env Groq terisi.
+ * Tidak menampilkan nilai env/token.
  */
 export async function GET() {
   const result: Record<string, unknown> = {
-    mode: useHfIntent() ? "hf" : "groq",
-    runtime: `${process.platform}-${process.arch} node ${process.version}`,
+    mode: "groq",
+    groqKey: !!process.env.GROQ_API_KEY,
+    models: {
+      fast: process.env.GROQ_MODEL_FAST || "openai/gpt-oss-20b",
+      main: process.env.GROQ_MODEL_MAIN || "openai/gpt-oss-120b",
+    },
   };
 
   try {
@@ -18,21 +19,6 @@ export async function GET() {
     result.db = { ok: true, faqs: Number(rows[0].n) };
   } catch (e) {
     result.db = { ok: false, error: (e as Error).message };
-  }
-
-  if (useHfIntent()) {
-    const t0 = Date.now();
-    try {
-      result.model = { ok: true, sample: await classify("paket belum sampai"), ms: Date.now() - t0 };
-    } catch (e) {
-      const err = e as Error;
-      result.model = {
-        ok: false,
-        ms: Date.now() - t0,
-        error: err.message,
-        stack: err.stack?.split("\n").slice(0, 6).join("\n"),
-      };
-    }
   }
 
   return Response.json(result, { headers: { "Cache-Control": "no-store" } });
