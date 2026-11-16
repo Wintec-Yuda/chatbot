@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Chatbot Bantuan Cliploo
 
-## Getting Started
+Chatbot FAQ Cliploo: **Next.js 16 + LangGraph.js + Groq + SQLite (libSQL/Turso)**.
+Kalau jawabannya tidak ada di database, pertanyaan diteruskan ke CS: tersimpan di tabel `handoff_requests` dan user diberi tahu untuk menunggu.
 
-First, run the development server:
+## Jalankan lokal
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # isi GROQ_API_KEY
+npm run db:seed              # buat local.db + isi 47 QnA
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Alur LangGraph (`src/lib/graph.ts`)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+analyze ─┬─ sensitif / minta CS ─────────────→ handoff
+         ├─ sapaan ──────────────────────────→ smalltalk (stream)
+         ├─ ambigu ──────────────────────────→ clarify (tanya balik)
+         ├─ di luar Cliploo ─────────────────→ offtopic
+         └─ FAQ → retrieve → grade ─┬─ relevan → generate (stream, + sumber)
+                       ↑            ├─ belum   → expand (kata kunci baru) ─┘ (1x)
+                                    └─ tetap tidak ada → handoff
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **analyze** (model cepat): klasifikasi intent + menulis ulang pertanyaan lanjutan jadi kalimat utuh + kata kunci.
+- **retrieve**: SQLite FTS5 (bm25) di `src/lib/search.ts`.
+- **grade** (model cepat): saring FAQ yang benar-benar menjawab.
+- **generate** (model utama): jawab hanya dari FAQ, markdown.
 
-## Learn More
+## File penting
 
-To learn more about Next.js, take a look at the following resources:
+| File | Isi |
+|---|---|
+| `src/data/faqs.ts` | Kategori & QnA. Ubah di sini lalu `npm run db:seed` |
+| `src/lib/graph.ts` | Graph LangGraph, prompt, teks tetap (handoff/offtopic) |
+| `src/lib/search.ts` | Pencarian FTS5 |
+| `src/app/api/chat/route.ts` | API streaming NDJSON + rate limit |
+| `src/components/Chat.tsx` | UI chat |
+| `scripts/eval.ts` | `npm run eval` — uji 20 pertanyaan contoh |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Lihat pertanyaan yang dioper ke CS
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+sqlite3 local.db "SELECT id, reason, question, created_at FROM handoff_requests ORDER BY id DESC"
+```
 
-## Deploy on Vercel
+## Deploy ke Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Buat DB di [Turso](https://turso.tech): `turso db create cliploo-chatbot`, lalu ambil URL (`turso db show --url`) dan token (`turso db tokens create`).
+2. Isi DB Turso sekali dari laptop:
+   ```bash
+   TURSO_DATABASE_URL=libsql://... TURSO_AUTH_TOKEN=... npm run db:seed
+   ```
+3. Push ke GitHub → import di Vercel → isi env `GROQ_API_KEY`, `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+> SQLite file biasa tidak bisa dipakai di Vercel (filesystem tidak permanen), makanya pakai Turso.

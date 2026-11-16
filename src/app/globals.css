@@ -1,26 +1,90 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --bg: #f6f5fa;
+  --surface: #ffffff;
+  --surface-2: #f0edfb;
+  --border: #e6e3ef;
+  --text: #17161c;
+  --muted: #6b6878;
+  --brand: #602cff;
+  --brand-ink: #ffffff;
+  --brand-soft: #efe9ff;
+  --warn-soft: #fff6e5;
+  --warn: #9a5b00;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: #0e0d12;
+    --surface: #18171f;
+    --surface-2: #221f2e;
+    --border: #2c2a36;
+    --text: #ecebf2;
+    --muted: #9b98a8;
+    --brand: #9370ff;
+    --brand-ink: #ffffff;
+    --brand-soft: #2a2245;
+    --warn-soft: #2e2512;
+    --warn: #f0b552;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--border);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-soft: var(--brand-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --font-sans: var(--font-geist-sans);
 }
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Isi jawaban markdown */
+.md > * + * {
+  margin-top: 0.5rem;
+}
+.md ol {
+  list-style: decimal;
+  padding-left: 1.25rem;
+}
+.md ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+}
+.md li + li {
+  margin-top: 0.25rem;
+}
+.md strong {
+  font-weight: 600;
+}
+.md a {
+  color: var(--brand);
+  text-decoration: underline;
+}
+
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+.dot {
+  animation: blink 1.2s infinite both;
+}
+.dot:nth-child(2) { animation-delay: 0.15s; }
+.dot:nth-child(3) { animation-delay: 0.3s; }
