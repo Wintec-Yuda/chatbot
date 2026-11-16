@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { graph, STREAMED_NODES, toInput, type Outcome } from "@/lib/graph";
+import { getGraph, STREAMED_NODES, toInput, type Outcome } from "@/lib/graph";
 import { checkRateLimit } from "@/lib/rateLimit";
 import type { FaqHit } from "@/lib/search";
 
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     );
   }
 
-  if (!process.env.GROQ_API_KEY) {
+  if (process.env.INTENT_PROVIDER !== "hf" && !process.env.GROQ_API_KEY) {
     return Response.json({ error: "GROQ_API_KEY belum diisi di .env.local" }, { status: 500 });
   }
 
@@ -60,7 +60,7 @@ export async function POST(req: Request) {
       const send = (e: ChatEvent) => controller.enqueue(encoder.encode(JSON.stringify(e) + "\n"));
       const final: { outcome?: Outcome; answer?: string; relevant?: FaqHit[]; ticketId?: number | null } = {};
       try {
-        const events = await graph.stream(toInput(sessionId, turns), {
+        const events = await getGraph().stream(toInput(sessionId, turns), {
           streamMode: ["messages", "updates"],
           signal: req.signal,
         });

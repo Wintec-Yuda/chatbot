@@ -46,3 +46,8 @@ local.db*
 
 # catatan env berisi rahasia
 env.txt
+
+# training
+training/.venv/
+training/out/
+.cache/

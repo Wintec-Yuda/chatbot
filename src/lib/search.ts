@@ -57,3 +57,22 @@ export async function searchFaqs(text: string, limit = 5): Promise<FaqHit[]> {
     score: Number(r.score),
   }));
 }
+
+export async function getFaq(id: number): Promise<FaqHit | null> {
+  if (!Number.isInteger(id)) return null;
+  const { rows } = await getDb().execute({
+    sql: `SELECT f.id, f.category, c.name AS category_name, f.question, f.answer
+          FROM faqs f JOIN categories c ON c.slug = f.category WHERE f.id = ?`,
+    args: [id],
+  });
+  const r = rows[0];
+  if (!r) return null;
+  return {
+    id: Number(r.id),
+    category: String(r.category),
+    categoryName: String(r.category_name),
+    question: String(r.question),
+    answer: String(r.answer),
+    score: 0,
+  };
+}

@@ -24,6 +24,8 @@ export const CATEGORIES: Category[] = [
 ];
 
 export type Faq = {
+  /** ID tetap — dipakai sebagai label model. Jangan diubah; FAQ baru pakai angka berikutnya. */
+  id: number;
   category: string;
   question: string;
   answer: string;
@@ -33,6 +35,7 @@ export type Faq = {
 export const FAQS: Faq[] = [
   // ───────────── Akun ─────────────
   {
+    id: 1,
     category: "akun",
     question: "Bagaimana cara daftar akun Cliploo?",
     answer:
@@ -40,6 +43,7 @@ export const FAQS: Faq[] = [
     keywords: "register buat akun bikin akun sign up registrasi baru",
   },
   {
+    id: 2,
     category: "akun",
     question: "Saya tidak menerima kode OTP, harus bagaimana?",
     answer:
@@ -47,6 +51,7 @@ export const FAQS: Faq[] = [
     keywords: "otp tidak masuk kode verifikasi gak dateng sms whatsapp kirim ulang",
   },
   {
+    id: 3,
     category: "akun",
     question: "Bagaimana cara mengganti nomor HP atau email akun?",
     answer:
@@ -54,6 +59,7 @@ export const FAQS: Faq[] = [
     keywords: "ubah ganti nomor hp handphone email akun",
   },
   {
+    id: 4,
     category: "akun",
     question: "Bagaimana cara mengubah atau menambah alamat pengiriman?",
     answer:
@@ -61,6 +67,7 @@ export const FAQS: Faq[] = [
     keywords: "alamat ubah ganti tambah alamat utama pengiriman salah alamat",
   },
   {
+    id: 5,
     category: "akun",
     question: "Bagaimana cara menghapus akun Cliploo?",
     answer:
@@ -70,6 +77,7 @@ export const FAQS: Faq[] = [
 
   // ───────────── Pembayaran ─────────────
   {
+    id: 6,
     category: "pembayaran",
     question: "Metode pembayaran apa saja yang tersedia di Cliploo?",
     answer:
@@ -77,6 +85,7 @@ export const FAQS: Faq[] = [
     keywords: "metode bayar cara bayar pembayaran ewallet e-wallet dana ovo gopay qris va virtual account transfer bank kartu kredit paylater alfamart indomaret",
   },
   {
+    id: 7,
     category: "pembayaran",
     question: "Mengapa saya tidak bisa membayar dengan COD?",
     answer:
@@ -84,6 +93,7 @@ export const FAQS: Faq[] = [
     keywords: "cod bayar di tempat tidak bisa cod gak ada pilihan cod",
   },
   {
+    id: 8,
     category: "pembayaran",
     question: "Berapa lama batas waktu pembayaran?",
     answer:
@@ -91,6 +101,7 @@ export const FAQS: Faq[] = [
     keywords: "batas waktu bayar expired kadaluarsa habis waktu pembayaran countdown",
   },
   {
+    id: 9,
     category: "pembayaran",
     question: "Sudah bayar tapi status pesanan masih Belum Bayar?",
     answer:
@@ -98,6 +109,7 @@ export const FAQS: Faq[] = [
     keywords: "sudah bayar belum terkonfirmasi status belum bayar pembayaran tidak masuk pending",
   },
   {
+    id: 10,
     category: "pembayaran",
     question: "Kenapa pembayaran pakai kartu kredit/debit gagal?",
     answer:
@@ -105,6 +117,7 @@ export const FAQS: Faq[] = [
     keywords: "kartu kredit debit gagal ditolak cc visa mastercard",
   },
   {
+    id: 11,
     category: "pembayaran",
     question: "Bagaimana cara bayar lewat Virtual Account?",
     answer:
@@ -114,6 +127,7 @@ export const FAQS: Faq[] = [
 
   // ───────────── Pengiriman ─────────────
   {
+    id: 12,
     category: "pengiriman",
     question: "Bagaimana cara melacak pesanan saya?",
     answer:
@@ -121,6 +135,7 @@ export const FAQS: Faq[] = [
     keywords: "lacak tracking resi cek posisi paket dimana paket status pengiriman",
   },
   {
+    id: 13,
     category: "pengiriman",
     question: "Pesanan saya belum sampai padahal estimasi sudah lewat?",
     answer:
@@ -128,6 +143,7 @@ export const FAQS: Faq[] = [
     keywords: "belum sampai belum nyampe telat terlambat lama paket tidak datang estimasi lewat",
   },
   {
+    id: 14,
     category: "pengiriman",
     question: "Status paket sudah diterima tapi saya belum menerima barangnya?",
     answer:
@@ -135,6 +151,7 @@ export const FAQS: Faq[] = [
     keywords: "status diterima padahal belum terima paket hilang tidak sampai kurir bohong",
   },
   {
+    id: 15,
     category: "pengiriman",
     question: "Bagaimana cara mendapatkan gratis ongkir?",
     answer:
@@ -142,6 +159,7 @@ export const FAQS: Faq[] = [
     keywords: "gratis ongkir free ongkir ongkos kirim murah voucher ongkir",
   },
   {
+    id: 16,
     category: "pengiriman",
     question: "Bisakah mengubah alamat setelah pesanan dibuat?",
     answer:
@@ -151,6 +169,7 @@ export const FAQS: Faq[] = [
 
   // ───────────── Pesanan ─────────────
   {
+    id: 17,
     category: "pesanan",
     question: "Di mana saya bisa melihat semua pesanan saya?",
     answer:
@@ -158,6 +177,7 @@ export const FAQS: Faq[] = [
     keywords: "lihat pesanan riwayat pesanan order history daftar pesanan",
   },
   {
+    id: 18,
     category: "pesanan",
     question: "Kapan saya harus menekan Pesanan Diterima?",
     answer:
@@ -165,6 +185,7 @@ export const FAQS: Faq[] = [
     keywords: "konfirmasi pesanan diterima selesai kapan tekan diterima",
   },
   {
+    id: 19,
     category: "pesanan",
     question: "Bagaimana cara memberi penilaian (review) produk?",
     answer:
@@ -172,6 +193,7 @@ export const FAQS: Faq[] = [
     keywords: "review ulasan nilai penilaian rating bintang komentar produk",
   },
   {
+    id: 20,
     category: "pesanan",
     question: "Bagaimana cara membeli lagi produk yang pernah saya beli?",
     answer:
@@ -181,6 +203,7 @@ export const FAQS: Faq[] = [
 
   // ───────────── Pembatalan ─────────────
   {
+    id: 21,
     category: "pembatalan",
     question: "Bagaimana cara membatalkan pesanan?",
     answer:
@@ -188,6 +211,7 @@ export const FAQS: Faq[] = [
     keywords: "batal cancel batalin pesanan membatalkan order",
   },
   {
+    id: 22,
     category: "pembatalan",
     question: "Pesanan saya dibatalkan, uangnya kembali ke mana?",
     answer:
@@ -195,6 +219,7 @@ export const FAQS: Faq[] = [
     keywords: "dana pembatalan refund batal uang kembali kemana",
   },
   {
+    id: 23,
     category: "pembatalan",
     question: "Kenapa pesanan saya dibatalkan otomatis?",
     answer:
@@ -204,6 +229,7 @@ export const FAQS: Faq[] = [
 
   // ───────────── Pengembalian & Dana ─────────────
   {
+    id: 24,
     category: "pengembalian",
     question: "Bagaimana cara mengajukan pengembalian barang/dana?",
     answer:
@@ -211,6 +237,7 @@ export const FAQS: Faq[] = [
     keywords: "retur return kembalikan barang ajukan pengembalian refund cara",
   },
   {
+    id: 25,
     category: "pengembalian",
     question: "Berapa lama batas waktu mengajukan pengembalian?",
     answer:
@@ -218,6 +245,7 @@ export const FAQS: Faq[] = [
     keywords: "batas waktu retur berapa hari pengembalian deadline lewat",
   },
   {
+    id: 26,
     category: "pengembalian",
     question: "Kapan dana pengembalian masuk ke rekening saya?",
     answer:
@@ -225,6 +253,7 @@ export const FAQS: Faq[] = [
     keywords: "refund kapan masuk dana kembali berapa lama uang balik pengembalian dana",
   },
   {
+    id: 27,
     category: "pengembalian",
     question: "Apa itu Garansi Bebas Pengembalian?",
     answer:
@@ -232,6 +261,7 @@ export const FAQS: Faq[] = [
     keywords: "garansi bebas pengembalian berubah pikiran gratis retur free return",
   },
   {
+    id: 28,
     category: "pengembalian",
     question: "Produk apa saja yang tidak bisa dikembalikan?",
     answer:
@@ -239,6 +269,7 @@ export const FAQS: Faq[] = [
     keywords: "tidak bisa retur dikecualikan pengecualian custom mystery box perhiasan",
   },
   {
+    id: 29,
     category: "pengembalian",
     question: "Bagaimana syarat kondisi barang yang dikembalikan?",
     answer:
@@ -246,6 +277,7 @@ export const FAQS: Faq[] = [
     keywords: "syarat retur kondisi barang kemas packing segel label",
   },
   {
+    id: 30,
     category: "pengembalian",
     question: "Siapa yang menanggung ongkir pengembalian?",
     answer:
@@ -253,6 +285,7 @@ export const FAQS: Faq[] = [
     keywords: "ongkir retur ongkos kirim balik bayar siapa gratis jemput kurir",
   },
   {
+    id: 31,
     category: "pengembalian",
     question: "Pengajuan pengembalian saya ditolak, apa yang bisa saya lakukan?",
     answer:
@@ -262,6 +295,7 @@ export const FAQS: Faq[] = [
 
   // ───────────── Garansi 100% Ori ─────────────
   {
+    id: 32,
     category: "garansi-ori",
     question: "Apa itu Garansi 100% Ori?",
     answer:
@@ -269,6 +303,7 @@ export const FAQS: Faq[] = [
     keywords: "garansi ori original asli palsu kw keaslian",
   },
   {
+    id: 33,
     category: "garansi-ori",
     question: "Saya curiga produknya palsu, bagaimana cara klaim Garansi Ori?",
     answer:
@@ -278,6 +313,7 @@ export const FAQS: Faq[] = [
 
   // ───────────── Voucher & Promo ─────────────
   {
+    id: 34,
     category: "voucher",
     question: "Bagaimana cara memakai voucher?",
     answer:
@@ -285,6 +321,7 @@ export const FAQS: Faq[] = [
     keywords: "pakai voucher cara pakai kupon kode promo diskon checkout",
   },
   {
+    id: 35,
     category: "voucher",
     question: "Kenapa voucher saya tidak bisa dipakai?",
     answer:
@@ -292,6 +329,7 @@ export const FAQS: Faq[] = [
     keywords: "voucher tidak bisa dipakai gagal tidak berlaku error kupon",
   },
   {
+    id: 36,
     category: "voucher",
     question: "Apa itu voucher pembelian pertama?",
     answer:
@@ -299,6 +337,7 @@ export const FAQS: Faq[] = [
     keywords: "voucher pengguna baru pembelian pertama first purchase new user",
   },
   {
+    id: 37,
     category: "voucher",
     question: "Apa itu Flash Sale?",
     answer:
@@ -308,6 +347,7 @@ export const FAQS: Faq[] = [
 
   // ───────────── Cliploo Live & Video ─────────────
   {
+    id: 38,
     category: "live-video",
     question: "Apa itu Cliploo Live?",
     answer:
@@ -315,6 +355,7 @@ export const FAQS: Faq[] = [
     keywords: "live streaming siaran langsung belanja live",
   },
   {
+    id: 39,
     category: "live-video",
     question: "Bagaimana cara membeli produk dari video atau Live?",
     answer:
@@ -324,6 +365,7 @@ export const FAQS: Faq[] = [
 
   // ───────────── Jualan di Cliploo ─────────────
   {
+    id: 40,
     category: "jualan",
     question: "Bagaimana cara membuka Toko Cliploo?",
     answer:
@@ -331,6 +373,7 @@ export const FAQS: Faq[] = [
     keywords: "buka toko jadi seller jualan daftar penjual mulai jualan",
   },
   {
+    id: 41,
     category: "jualan",
     question: "Verifikasi wajah saat buka toko gagal terus?",
     answer:
@@ -338,6 +381,7 @@ export const FAQS: Faq[] = [
     keywords: "verifikasi wajah gagal sistem error face wajah tidak terdeteksi",
   },
   {
+    id: 42,
     category: "jualan",
     question: "Bagaimana cara menarik saldo penjualan?",
     answer:
@@ -345,6 +389,7 @@ export const FAQS: Faq[] = [
     keywords: "tarik saldo penjual withdraw pencairan dana toko",
   },
   {
+    id: 43,
     category: "jualan",
     question: "Bagaimana cara menutup toko sementara (libur)?",
     answer:
@@ -352,6 +397,7 @@ export const FAQS: Faq[] = [
     keywords: "tutup toko sementara libur cuti mode libur",
   },
   {
+    id: 44,
     category: "jualan",
     question: "Produk apa yang dilarang dijual di Cliploo?",
     answer:
@@ -361,6 +407,7 @@ export const FAQS: Faq[] = [
 
   // ───────────── Keamanan ─────────────
   {
+    id: 45,
     category: "keamanan",
     question: "Apakah Cliploo pernah meminta kode OTP atau password?",
     answer:
@@ -368,6 +415,7 @@ export const FAQS: Faq[] = [
     keywords: "otp password pin diminta cs minta kode penipuan aman",
   },
   {
+    id: 46,
     category: "keamanan",
     question: "Bagaimana cara melaporkan penjual atau produk mencurigakan?",
     answer:
@@ -375,6 +423,7 @@ export const FAQS: Faq[] = [
     keywords: "lapor laporkan produk penjual mencurigakan scam penipu report",
   },
   {
+    id: 47,
     category: "keamanan",
     question: "Penjual meminta saya transfer langsung di luar aplikasi, aman?",
     answer:

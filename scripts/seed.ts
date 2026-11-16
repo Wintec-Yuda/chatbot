@@ -18,8 +18,8 @@ async function main() {
         args: [c.slug, c.name],
       })),
       ...FAQS.map((f) => ({
-        sql: "INSERT INTO faqs (category, question, answer, keywords) VALUES (?, ?, ?, ?)",
-        args: [f.category, f.question, f.answer, f.keywords],
+        sql: "INSERT INTO faqs (id, category, question, answer, keywords) VALUES (?, ?, ?, ?, ?)",
+        args: [f.id, f.category, f.question, f.answer, f.keywords],
       })),
       "INSERT INTO faqs_fts(faqs_fts) VALUES ('rebuild')",
     ],
