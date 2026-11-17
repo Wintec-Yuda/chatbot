@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Python venv & cache model
+    "training/**",
+    ".cache/**",
   ]),
 ]);
 

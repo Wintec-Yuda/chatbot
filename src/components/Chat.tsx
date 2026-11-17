@@ -14,6 +14,15 @@ type Msg = {
   sources?: Source[];
   ticketId?: number | null;
   error?: boolean;
+  provider?: Provider;
+};
+
+type Provider = "groq" | "hf";
+
+const PROVIDER_KEY = "cliploo-chat-provider";
+const PROVIDER_INFO: Record<Provider, { label: string; hint: string }> = {
+  groq: { label: "Groq AI", hint: "LLM gpt-oss · paham konteks percakapan" },
+  hf: { label: "Model Cliploo", hint: "Model buatan sendiri di Hugging Face · jawaban FAQ apa adanya" },
 };
 
 const STORE_KEY = "cliploo-chat-v1";
@@ -32,6 +41,7 @@ const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
 export default function Chat() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [sessionId, setSessionId] = useState("");
+  const [provider, setProvider] = useState<Provider>("groq");
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [waiting, setWaiting] = useState(false); // sebelum token pertama tiba
@@ -48,7 +58,17 @@ export default function Chat() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- sekali saat mount, dari localStorage
     setSessionId(saved.sessionId || uid());
     setMessages((saved.messages || []).filter((m) => !m.error));
+    try {
+      if (localStorage.getItem(PROVIDER_KEY) === "hf") setProvider("hf");
+    } catch {}
   }, []);
+
+  function chooseProvider(p: Provider) {
+    setProvider(p);
+    try {
+      localStorage.setItem(PROVIDER_KEY, p);
+    } catch {}
+  }
 
   useEffect(() => {
     if (!sessionId) return;
@@ -69,7 +89,7 @@ export default function Chat() {
     const userMsg: Msg = { id: uid(), role: "user", content };
     const botId = uid();
     const history = [...base.filter((m) => !m.error), userMsg];
-    setMessages([...history, { id: botId, role: "assistant", content: "" }]);
+    setMessages([...history, { id: botId, role: "assistant", content: "", provider }]);
     setBusy(true);
     setWaiting(true);
 
@@ -85,6 +105,7 @@ export default function Chat() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          provider,
           sessionId,
           messages: history.map(({ role, content }) => ({ role, content })),
         }),
@@ -169,6 +190,27 @@ export default function Chat() {
           </button>
         )}
       </header>
+
+      {/* Switch mesin jawaban */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-line bg-surface px-4 py-2">
+        <div role="radiogroup" aria-label="Mesin jawaban" className="flex rounded-full bg-surface-2 p-0.5">
+          {(Object.keys(PROVIDER_INFO) as Provider[]).map((p) => (
+            <button
+              key={p}
+              role="radio"
+              aria-checked={provider === p}
+              disabled={busy}
+              onClick={() => chooseProvider(p)}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors disabled:opacity-50 ${
+                provider === p ? "bg-brand text-brand-ink shadow-sm" : "text-muted hover:text-ink"
+              }`}
+            >
+              {PROVIDER_INFO[p].label}
+            </button>
+          ))}
+        </div>
+        <p className="min-w-0 flex-1 text-[11px] leading-tight text-muted">{PROVIDER_INFO[provider].hint}</p>
+      </div>
 
       {/* Pesan */}
       <main className="flex-1 overflow-y-auto px-4 py-5">
@@ -312,6 +354,7 @@ function BotMessage({ msg, waiting, onRetry }: { msg: Msg; waiting: boolean; onR
 
       {msg.outcome && msg.content && (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-1 text-xs text-muted">
+          {msg.provider && <span>{PROVIDER_INFO[msg.provider].label}</span>}
           {msg.sources?.map((s) => (
             <span key={s.id} title={s.question} className="inline-flex items-center gap-1">
               📄 {s.category}

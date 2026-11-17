@@ -3,7 +3,7 @@
  * Jalankan setiap kali QnA, prompt, atau model diubah. Butuh GROQ_API_KEY di .env.local.
  * Catatan: tiap kasus memakai 2–4 panggilan Groq, perhatikan kuota.
  */
-import { graph, toInput, type Outcome } from "../src/lib/graph";
+import { getGraph, toInput, type Outcome, type Provider } from "../src/lib/graph";
 
 type Case = { q: string; history?: string[]; outcome: Outcome; category?: string };
 
@@ -36,12 +36,16 @@ const CASES: Case[] = [
 ];
 
 async function main() {
-  if (!process.env.GROQ_API_KEY) {
+  // EVAL_PROVIDER=hf npm run eval → uji model Cliploo (hanya jalan di Linux/Mac Apple Silicon).
+  const provider = (process.env.EVAL_PROVIDER === "hf" ? "hf" : "groq") as Provider;
+  const graph = getGraph(provider);
+  console.log(`mode: ${provider}\n`);
+  if (provider === "groq" && !process.env.GROQ_API_KEY) {
     console.error("GROQ_API_KEY belum diisi di .env.local");
     process.exit(1);
   }
   // Kuota gratis Groq ~8.000 token/menit → beri jeda antar kasus (ubah lewat EVAL_DELAY_MS).
-  const delay = Number(process.env.EVAL_DELAY_MS ?? 7000);
+  const delay = Number(process.env.EVAL_DELAY_MS ?? (provider === "hf" ? 0 : 7000));
   let pass = 0;
   for (const [i, c] of CASES.entries()) {
     if (i > 0) await new Promise((r) => setTimeout(r, delay));

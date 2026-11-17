@@ -1,11 +1,14 @@
 import { z } from "zod";
-import { graph, STREAMED_NODES, toInput, type Outcome } from "@/lib/graph";
+import { getGraph, PROVIDERS, STREAMED_NODES, toInput, type Outcome } from "@/lib/graph";
+import { ModelUnavailableError } from "@/lib/intent";
 import { checkRateLimit } from "@/lib/rateLimit";
 import type { FaqHit } from "@/lib/search";
 
 export const maxDuration = 30;
 
 const Body = z.object({
+  /** Dipilih lewat switch di UI. groq = LLM Groq, hf = model buatan sendiri di Hugging Face. */
+  provider: z.enum(PROVIDERS as [string, ...string[]]).default("groq"),
   sessionId: z.string().min(8).max(64),
   messages: z
     .array(z.object({ role: z.enum(["user", "assistant"]), content: z.string().min(1).max(4000) }))
@@ -43,7 +46,8 @@ export async function POST(req: Request) {
     );
   }
 
-  if (!process.env.GROQ_API_KEY) {
+  const provider = parsed.data.provider as "groq" | "hf";
+  if (provider === "groq" && !process.env.GROQ_API_KEY) {
     return Response.json({ error: "GROQ_API_KEY belum diisi di .env.local" }, { status: 500 });
   }
 
@@ -60,7 +64,7 @@ export async function POST(req: Request) {
       const send = (e: ChatEvent) => controller.enqueue(encoder.encode(JSON.stringify(e) + "\n"));
       const final: { outcome?: Outcome; answer?: string; relevant?: FaqHit[]; ticketId?: number | null } = {};
       try {
-        const events = await graph.stream(toInput(sessionId, turns), {
+        const events = await getGraph(provider).stream(toInput(sessionId, turns), {
           streamMode: ["messages", "updates"],
           signal: req.signal,
         });
@@ -92,7 +96,11 @@ export async function POST(req: Request) {
         send({
           type: "error",
           message:
-            status === 429
+            e instanceof ModelUnavailableError
+              ? e.message
+              : provider === "hf" && !final.outcome
+                ? "Model Cliploo sedang tidak bisa dimuat. Coba lagi, atau pindah ke Groq."
+                : status === 429
               ? "Server sedang sibuk (kuota model habis). Coba lagi sebentar lagi ya."
               : "Maaf, terjadi gangguan. Coba kirim ulang pesanmu.",
         });
